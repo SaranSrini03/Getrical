@@ -3,24 +3,165 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #171717;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card: #0a0a0a;
+  --card-foreground: #ededed;
+  --popover: #0a0a0a;
+  --popover-foreground: #ededed;
+  --primary: #fafafa;
+  --primary-foreground: #171717;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d4d4d8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --card: #0a0a0a;
+    --card-foreground: #ededed;
+    --popover: #0a0a0a;
+    --popover-foreground: #ededed;
+    --primary: #fafafa;
+    --primary-foreground: #171717;
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fafafa;
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #d4d4d8;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes zoom-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes zoom-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+@keyframes slide-in-from-top-2 {
+  from { transform: translateY(-0.5rem); }
+  to { transform: translateY(0); }
+}
+@keyframes slide-in-from-bottom-2 {
+  from { transform: translateY(0.5rem); }
+  to { transform: translateY(0); }
+}
+@keyframes slide-in-from-left-2 {
+  from { transform: translateX(-0.5rem); }
+  to { transform: translateX(0); }
+}
+@keyframes slide-in-from-right-2 {
+  from { transform: translateX(0.5rem); }
+  to { transform: translateX(0); }
+}
+@keyframes slide-out-to-top {
+  to { transform: translateY(-100%); }
+}
+@keyframes slide-out-to-bottom {
+  to { transform: translateY(100%); }
+}
+@keyframes slide-out-to-left {
+  to { transform: translateX(-100%); }
+}
+@keyframes slide-out-to-right {
+  to { transform: translateX(100%); }
+}
+
+.animate-in {
+  animation-duration: 0.2s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+.animate-out {
+  animation-duration: 0.15s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+.fade-in-0 { animation-name: fade-in; }
+.fade-out-0 { animation-name: fade-out; }
+.zoom-in-95 { animation-name: zoom-in; }
+.zoom-out-95 { animation-name: zoom-out; }
+.slide-in-from-top-2 { animation-name: slide-in-from-top-2; }
+.slide-in-from-bottom-2 { animation-name: slide-in-from-bottom-2; }
+.slide-in-from-left-2 { animation-name: slide-in-from-left-2; }
+.slide-in-from-right-2 { animation-name: slide-in-from-right-2; }
+.slide-out-to-top { animation-name: slide-out-to-top; }
+.slide-out-to-bottom { animation-name: slide-out-to-bottom; }
+.slide-out-to-left { animation-name: slide-out-to-left; }
+.slide-out-to-right { animation-name: slide-out-to-right; }

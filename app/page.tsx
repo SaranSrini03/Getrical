@@ -1,65 +1,140 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useFeaturedProducts } from "@/hooks/use-featured-products";
+import { useProductsList } from "@/hooks/use-products";
+import { CategoryCard } from "@/components/product/category-card";
+import { ProductCard } from "@/components/product/product-card";
+import { Button } from "@/components/ui/button";
+import { CATEGORIES } from "@/types";
+
+const heroSlides = [
+  {
+    title: "New arrivals",
+    subtitle: "Discover the latest products across all categories.",
+    cta: "Shop now",
+    href: "/products",
+    image:
+      "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200",
+  },
+  {
+    title: "Electronics",
+    subtitle: "Headphones, smart watches, and more.",
+    cta: "Browse electronics",
+    href: "/products?category=Electronics",
+    image:
+      "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200",
+  },
+];
+
+export default function HomePage() {
+  const { data: featured, isLoading: featuredLoading } = useFeaturedProducts();
+  const { data: allProducts, isLoading: listLoading } = useProductsList();
+  const latest =
+    allProducts?.slice().sort(() => Math.random() - 0.5).slice(0, 4) ?? [];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="flex flex-col">
+      <section className="relative overflow-hidden bg-muted">
+        <div className="container px-4 py-12 md:py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="relative z-10 text-center"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              {heroSlides[0].title}
+            </h1>
+            <p className="mx-auto mt-2 max-w-md text-muted-foreground">
+              {heroSlides[0].subtitle}
+            </p>
+            <Button asChild className="mt-4">
+              <Link href={heroSlides[0].href}>{heroSlides[0].cta}</Link>
+            </Button>
+          </motion.div>
         </div>
-      </main>
+      </section>
+
+      <section className="container px-4 py-8">
+        <h2 className="mb-4 text-xl font-semibold">Categories</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {CATEGORIES.map((cat) => (
+            <CategoryCard key={cat} category={cat} />
+          ))}
+        </div>
+      </section>
+
+      <section className="container px-4 py-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Featured</h2>
+          <Button variant="link" asChild>
+            <Link href="/products?featured=1">View all</Link>
+          </Button>
+        </div>
+        {featuredLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-64 animate-pulse rounded-xl bg-muted"
+                aria-hidden
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {featured?.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="container px-4 py-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Latest</h2>
+          <Button variant="link" asChild>
+            <Link href="/products">View all</Link>
+          </Button>
+        </div>
+        {listLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-64 animate-pulse rounded-xl bg-muted"
+                aria-hidden
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {latest.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="border-t bg-muted/30">
+        <div className="container px-4 py-12 text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-2xl font-semibold">Ready to shop?</h2>
+            <p className="mt-2 text-muted-foreground">
+              Browse thousands of products. Free shipping on orders over $50.
+            </p>
+            <Button asChild className="mt-4">
+              <Link href="/products">Go to products</Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }
