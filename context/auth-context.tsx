@@ -8,30 +8,35 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { User } from "@/types";
+import type { User, UserRole } from "@/types";
 
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
-  signIn: (email: string, password: string) => void;
+  signIn: (email: string, password: string, role?: UserRole) => void;
   signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const MOCK_USER: User = {
+const baseUser: Omit<User, "email" | "name" | "role"> = {
   id: "user-1",
-  email: "guest@example.com",
-  name: "Guest User",
-  role: "customer",
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  const signIn = useCallback((email: string, _password: string) => {
-    setUser({ ...MOCK_USER, email, name: email.split("@")[0] });
-  }, []);
+  const signIn = useCallback(
+    (email: string, _password: string, role: UserRole = "customer") => {
+      setUser({
+        ...baseUser,
+        email,
+        name: email.split("@")[0],
+        role,
+      });
+    },
+    []
+  );
 
   const signOut = useCallback(() => {
     setUser(null);

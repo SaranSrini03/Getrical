@@ -34,11 +34,13 @@ export interface CartItem {
   priceSnapshot: number;
 }
 
+export type UserRole = "customer" | "seller" | "admin";
+
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: "customer" | "admin";
+  role: UserRole;
 }
 
 export type SortOption =

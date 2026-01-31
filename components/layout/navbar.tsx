@@ -27,13 +27,60 @@ import {
 import { CATEGORIES } from "@/types";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
+export type NavMode = "customer" | "seller" | "admin";
+
+const CUSTOMER_LINKS = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
   { href: "/cart", label: "Cart" },
 ];
 
-export function Navbar() {
+const SELLER_LINKS = [
+  { href: "/seller", label: "Dashboard" },
+  { href: "/seller/products", label: "My Products" },
+  { href: "/seller/orders", label: "Orders" },
+];
+
+const ADMIN_LINKS = [
+  { href: "/admin", label: "Dashboard" },
+  { href: "/admin/users", label: "Users" },
+  { href: "/admin/sellers", label: "Sellers" },
+];
+
+const MODE_LINKS: Record<NavMode, { href: string; label: string }[]> = {
+  customer: CUSTOMER_LINKS,
+  seller: SELLER_LINKS,
+  admin: ADMIN_LINKS,
+};
+
+function ModeSwitcher({ currentMode }: { currentMode: NavMode }) {
+  const modes: { mode: NavMode; href: string; label: string }[] = [
+    { mode: "customer", href: "/", label: "Store" },
+    { mode: "seller", href: "/seller", label: "Seller" },
+    { mode: "admin", href: "/admin", label: "Admin" },
+  ];
+  return (
+    <div className="flex gap-1 rounded-md border border-input p-0.5">
+      {modes.map(({ mode, href, label }) => (
+        <Link key={mode} href={href}>
+          <Button
+            variant={currentMode === mode ? "secondary" : "ghost"}
+            size="sm"
+            className="h-7 px-2 text-xs"
+          >
+            {label}
+          </Button>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+interface NavbarProps {
+  mode: NavMode;
+}
+
+export function Navbar({ mode }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, signIn, signOut } = useAuth();
@@ -42,11 +89,16 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
+  const navLinks = MODE_LINKS[mode];
+  const isCustomer = mode === "customer";
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!search.trim()) return;
     router.push(`/products?search=${encodeURIComponent(search.trim())}`);
   };
+
+  const homeHref = mode === "customer" ? "/" : mode === "seller" ? "/seller" : "/admin";
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -92,46 +144,53 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              {isCustomer && (
+                <div className="my-2 border-t pt-2">
+                  <p className="px-3 py-1 text-xs font-semibold text-muted-foreground">
+                    Categories
+                  </p>
+                  {CATEGORIES.map((cat) => (
+                    <Link
+                      key={cat}
+                      href={`/products?category=${encodeURIComponent(cat)}`}
+                      onClick={() => setMobileOpen(false)}
+                      className="block rounded-md px-3 py-2 text-sm hover:bg-accent/50"
+                    >
+                      {cat}
+                    </Link>
+                  ))}
+                </div>
+              )}
               <div className="my-2 border-t pt-2">
-                <p className="px-3 py-1 text-xs font-semibold text-muted-foreground">
-                  Categories
-                </p>
-                {CATEGORIES.map((cat) => (
-                  <Link
-                    key={cat}
-                    href={`/products?category=${encodeURIComponent(cat)}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="block rounded-md px-3 py-2 text-sm hover:bg-accent/50"
-                  >
-                    {cat}
-                  </Link>
-                ))}
+                <ModeSwitcher currentMode={mode} />
               </div>
             </nav>
           </SheetContent>
         </Sheet>
 
-        <Link href="/" className="flex items-center gap-2 font-semibold">
+        <Link href={homeHref} className="flex items-center gap-2 font-semibold">
           <span className="text-xl">Store</span>
         </Link>
 
-        <form
-          onSubmit={handleSearch}
-          className="ml-4 hidden flex-1 max-w-md md:flex"
-        >
-          <div className="flex gap-1 rounded-md border bg-muted/30">
-            <Input
-              type="search"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border-0 bg-transparent focus-visible:ring-0"
-            />
-            <Button type="submit" variant="secondary" size="sm">
-              Search
-            </Button>
-          </div>
-        </form>
+        {isCustomer && (
+          <form
+            onSubmit={handleSearch}
+            className="ml-4 hidden flex-1 max-w-md md:flex"
+          >
+            <div className="flex gap-1 rounded-md border bg-muted/30">
+              <Input
+                type="search"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="border-0 bg-transparent focus-visible:ring-0"
+              />
+              <Button type="submit" variant="secondary" size="sm">
+                Search
+              </Button>
+            </div>
+          </form>
+        )}
 
         <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
@@ -148,41 +207,46 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          <div className="ml-2 hidden lg:block">
+            <ModeSwitcher currentMode={mode} />
+          </div>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/cart" className="relative">
-            <Button variant="ghost" size="icon" aria-label="Cart">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="8" cy="21" r="1" />
-                <circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
-              <AnimatePresence>
-                {count > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground"
-                  >
-                    {count > 99 ? "99+" : count}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Button>
-          </Link>
+          {isCustomer && (
+            <Link href="/cart" className="relative">
+              <Button variant="ghost" size="icon" aria-label="Cart">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
+                <AnimatePresence>
+                  {count > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground"
+                    >
+                      {count > 99 ? "99+" : count}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </Button>
+            </Link>
+          )}
 
           <DropdownMenu open={authOpen} onOpenChange={setAuthOpen}>
             <DropdownMenuTrigger asChild>
@@ -205,22 +269,48 @@ export function Navbar() {
                       <span className="text-xs font-normal text-muted-foreground">
                         {user?.email}
                       </span>
+                      <span className="text-xs font-normal text-muted-foreground capitalize">
+                        {user?.role}
+                      </span>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => { signOut(); setAuthOpen(false); }}>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      signOut();
+                      setAuthOpen(false);
+                    }}
+                  >
                     Sign out
                   </DropdownMenuItem>
                 </>
               ) : (
-                <DropdownMenuItem
-                  onClick={() => {
-                    signIn("guest@example.com", "");
-                    setAuthOpen(false);
-                  }}
-                >
-                  Sign in (demo)
-                </DropdownMenuItem>
+                <>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      signIn("guest@example.com", "", "customer");
+                      setAuthOpen(false);
+                    }}
+                  >
+                    Sign in as Customer
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      signIn("seller@example.com", "", "seller");
+                      setAuthOpen(false);
+                    }}
+                  >
+                    Sign in as Seller
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      signIn("admin@example.com", "", "admin");
+                      setAuthOpen(false);
+                    }}
+                  >
+                    Sign in as Admin
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
